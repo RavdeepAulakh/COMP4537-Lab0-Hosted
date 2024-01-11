@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/style.css">
+  <title>Button Generator</title>
+</head>
+<body>
+  <div class="container">
+    <label for="numButtons">How many buttons to create? </label>
+    <br>
+    <br>
+    <input type="text" id="numButtons" class="input-box">
+    <button id="goButton" onclick="buttonGenerator.createButtons()">Go</button>
+  </div>
+  <div id="buttonContainer" class="button-container"></div>
+  <div id="messageContainer" class="message-container"></div>
+  <script src="./js/script.js"></script>
+  <script src="./lang/messages/en/user.js"></script>
+</body>
+</html>
+
