@@ -1,173 +1,169 @@
-class ButtonGenerator {
-    constructor() {
-      this.numButtonsInput = document.getElementById('numButtons');
-      this.buttonContainer = document.getElementById('buttonContainer');
-      this.messageContainer = document.getElementById('messageContainer');
-      this.buttons = [];
-      this.buttonsCopy = [];
-      this.scattering = false;
-      this.goButton = document.getElementById('goButton');
-    }
-  
-    createButtons() {
-    
-      this.scattering = false;
+class Button {
+  constructor(number) {
+    this.element = document.createElement('div');
+    this.element.className = 'button';
+    this.number = number;
+    this.setColorAndNumber();
+  }
 
-      goButton.style.display = 'none';
+  setColorAndNumber() {
+    this.element.style.backgroundColor = this.getRandomColor();
+    this.element.textContent = `${this.number}`;
+  }
 
-      // Get the number of buttons from the user input
-      const numButtons = parseInt(this.numButtonsInput.value);
-  
-      // Validate input
-      if (isNaN(numButtons) || numButtons < 3 || numButtons > 7) {
-        alert(numberWarning);
-        return;
-      }
-  
-      // Clear previous buttons and messages
-      this.clearButtons();
-      this.clearMessage();
-  
-      // Create and append buttons
-      this.renderButtons(numButtons);
-  
-      // Counter to track completed scatterings
-      let completedScatterings = 0;
-  
-      setTimeout(() => {
-        
-        // Scatter buttons n times with a time interval of two seconds
-        for (let i = 0; i < numButtons; i++) {
-          setTimeout(() => {
-            this.scattering = true;
-            this.scatterButtons();
-  
-            // Increment the counter
-            completedScatterings++;
-  
-            // Check if all scatterings are completed
-            if (completedScatterings === numButtons) {
-              // All scatterings are completed, make buttons clickable and hide numbers
-              this.makeButtonsClickable();
-              this.hideNumbers();
-              goButton.style.display = 'block';
-            }
-          }, i * 2000);
+  getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+}
 
-        }
-      }, 1000 * numButtons);
+class Game {
+  constructor() {
+    this.numButtonsInput = document.getElementById('numButtons');
+    this.buttonContainer = document.getElementById('buttonContainer');
+    this.messageContainer = document.getElementById('messageContainer');
+    this.buttons = [];
+    this.buttonsCopy = [];
+    this.scattering = false;
+    this.goButton = document.getElementById('goButton');
+    this.messageDisplayed = false;
+  }
 
-  
+  createButtons() {
+    this.scattering = false;
+    this.messageDisplayed = false;
+    const numButtons = parseInt(this.numButtonsInput.value);
+
+    if (isNaN(numButtons) || numButtons < 3 || numButtons > 7) {
+      alert(numberWarning);
+      return;
     }
-  
-    clearButtons() {
-      // Clear previous buttons
-      this.buttonContainer.innerHTML = '';
-      this.buttons = [];
-    }
-  
-    clearMessage() {
-      // Clear previous messages
-      this.messageContainer.textContent = '';
-    }
-  
-    renderButtons(numButtons) {
-      // Create and append buttons with random colors and numbers
+
+    goButton.style.display = 'none';
+
+    this.clearButtons();
+    this.clearMessage();
+
+    this.renderButtons(numButtons);
+
+    let completedScatterings = 0;
+
+    setTimeout(() => {
       for (let i = 0; i < numButtons; i++) {
-        const button = document.createElement('div');
-        button.className = 'button';
-        button.style.backgroundColor = this.getRandomColor();
-        button.textContent = `${i + 1}`;
-        this.buttonContainer.appendChild(button);
-        this.buttons.push(button);
+        setTimeout(() => {
+          this.scattering = true;
+          this.scatterButtons();
+
+          completedScatterings++;
+
+          if (completedScatterings === numButtons) {
+            this.makeButtonsClickable();
+            this.hideNumbers();
+            goButton.style.display = 'block';
+          }
+        }, i * 2000);
       }
-      this.buttonsCopy = [...this.buttons];
-      
+    }, 1000 * numButtons);
+  }
+
+  clearButtons() {
+    this.buttonContainer.innerHTML = '';
+    this.buttons = [];
+  }
+
+  clearMessage() {
+    this.messageContainer.textContent = '';
+  }
+
+  renderButtons(numButtons) {
+    for (let i = 0; i < numButtons; i++) {
+      const button = new Button(i + 1);
+      this.buttonContainer.appendChild(button.element);
+      this.buttons.push(button);
     }
-  
-    scatterButtons() {
-      if (this.scattering) {
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-    
-        this.buttons.forEach(button => {
-          const rect = button.getBoundingClientRect();
-          const maxLeft = windowWidth - rect.width;
-          const maxTop = windowHeight - rect.height;
-  
-          const newLeft = Math.random() * maxLeft;
-          const newTop = Math.random() * maxTop;
+    this.buttonsCopy = [...this.buttons];
+  }
 
-          button.style.position = 'absolute';
-          button.style.left = `${newLeft}px`;
-          button.style.top = `${newTop}px`;
-        });
-      } else {
-        this.buttons.forEach(button => {
-          button.style.position = 'relative';
-          button.style.left = '0';
-          button.style.top = '0';
-        });
-      }
-    }    
-    
+  scatterButtons() {
+    if (this.scattering) {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
 
-    makeButtonsClickable(){
       this.buttons.forEach(button => {
-        button.addEventListener('click', () => this.checkOrder(button));
-      })
-    }
-       
- 
-    hideNumbers() {
-      // Hide numbers and make buttons clickable
-      this.buttons.forEach(button => {
-        button.textContent = '';
-      });
-    }
+        const rect = button.element.getBoundingClientRect();
+        const maxLeft = windowWidth - rect.width;
+        const maxTop = windowHeight - rect.height;
 
-    checkOrder(clickedButton) {
-      
-      let index = this.buttonsCopy.indexOf(clickedButton);
-    
-      if (index === 0) {
-        // Correct order, reveal the number and check next button
-        clickedButton.textContent = `${(this.buttons.length - this.buttonsCopy.length) + 1}`;
-        this.buttonsCopy.splice(index, 1); // Remove the checked button from the array
-    
-        if (this.buttonsCopy.length === 0) {
-          this.displayMessage(correct);
-        }
-      } else {
-        // Wrong order, reveal correct order and end the game
-        this.displayMessage(wrong);
-        this.revealCorrectOrder();
-      }
-    }    
-    
-  
-    revealCorrectOrder() {
-      // Reveal the correct order of all buttons
-      this.buttons.forEach((button, index) => {
-        button.textContent = `${index + 1}`;
+        const newLeft = Math.random() * maxLeft;
+        const newTop = Math.random() * maxTop;
+
+        button.element.style.position = 'absolute';
+        button.element.style.left = `${newLeft}px`;
+        button.element.style.top = `${newTop}px`;
       });
-      this.buttons = []; // Clear the buttons array
-    }
-  
-    displayMessage(message) {
-      // Display a message in the message container
-      this.messageContainer.textContent = message;
-    }
-  
-    getRandomColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
+    } else {
+      this.buttons.forEach(button => {
+        button.element.style.position = 'relative';
+        button.element.style.left = '0';
+        button.element.style.top = '0';
+      });
     }
   }
-  
-  const buttonGenerator = new ButtonGenerator();
-  
+
+  makeButtonsClickable() {
+    if (!this.scattering) {
+      return;
+    }
+
+    this.buttons.forEach(button => {
+      button.element.addEventListener('click', () => this.checkOrder(button));
+    });
+  }
+
+  hideNumbers() {
+    this.buttons.forEach(button => {
+      button.element.textContent = '';
+    });
+  }
+
+  checkOrder(clickedButton) {
+    let index = this.buttonsCopy.indexOf(clickedButton);
+    if(!this.messageDisplayed){
+      if (index === 0) {
+        clickedButton.element.textContent = `${(this.buttons.length - this.buttonsCopy.length) + 1}`;
+        this.buttonsCopy.splice(index, 1);
+
+        if (this.buttonsCopy.length === 0) {
+          this.displayMessage(correct);
+          this.messageDisplayed = true;
+        }
+      } else {
+        this.displayMessage(wrong);
+        this.messageDisplayed = true;
+        this.revealCorrectOrder();
+      }
+    }
+  }
+
+  revealCorrectOrder() {
+    this.buttons.forEach((button, index) => {
+      button.element.textContent = `${index + 1}`;
+    });
+
+    this.buttons.forEach((button) => {
+      button.removeEventListener('click', () => this.checkOrder(button))
+    });
+    
+    this.buttons = [];
+  }
+
+  displayMessage(message) {
+    this.messageContainer.textContent = message;
+  }
+}
+
+const buttonGenerator = new Game();
